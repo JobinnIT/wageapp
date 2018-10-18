@@ -1,4 +1,6 @@
 # Saskatoon Living Wage Calculator
+[![Build Status](https://travis-ci.com/tbenjis/wageapp.svg?token=B6jRszHM5YNqH23rKzye&branch=master)](https://travis-ci.com/tbenjis/wageapp)
+
 This simple app lets you calculate and compare your wage (business or individual)  with that of the city of Saskatoon using data from https://www.livingwageyxe.ca/resources. It's possible to extend the app to support multiple cities. Additionally, the app can be duplicated for other cities in the country.
 
 
