@@ -6,7 +6,7 @@ This simple app lets you calculate and compare your wage (business or individual
 Wageapp uses a JSON file containing the city data to do calculations. This file can be modified and updated with new data as needed.
 
 - Fork the repo.
-- Paste the information in the JSON file `wage.json.` Here is an example:
+- Edit the information in the JSON file `wage.json`. Here is an example:
 
 ```json
 {
