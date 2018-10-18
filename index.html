@@ -1,0 +1,273 @@
+<!--
+*
+*  Living Wage Calculator
+*  version 1.0
+*
+-->
+
+<!DOCTYPE html>
+<html ng-app="wageApp">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>City Living Wage Calculator | Dashboard</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <!-- Bootstrap Tour -->
+    <link href="css/plugins/bootstrapTour/bootstrap-tour.min.css" rel="stylesheet">
+
+
+</head>
+
+<body ng-cloak class="top-navigation">
+    <div id="wrapper container" ng-controller="wageController">
+        <div id="page-wrapper" class="gray-bg dashbard-1">
+                <div id="top-content" class="row  border-bottom white-bg dashboard-header">
+
+                    <div class="col-md-3">
+                        <h2>{{cityData.name}}</h2>
+                        <h3>Living Wage Calculator</h3>
+                        <div id="step1" class="wage-top">
+                        <div class="full-height-scroll">
+                            <ul class="list-group clear-list m-t">
+                                <li class="list-group-item {{$index ? 0 : 'fist-item'}}" ng-repeat="item in cityData.items">
+                                    <span class="pull-right">
+                                        <b>${{item.monthly_budget | number:2}} /month</b>
+                                    </span>
+                                    <span class="label label-primary">{{$index + 1}}</span> {{item.title}}
+                                </li>
+                            </ul>
+                        </div>
+                        </div>
+                    </div>
+                    <div id="step7" class="col-md-6">
+                            <canvas id="bar" height="105" class="chart chart-bar" chart-data="data" chart-labels="labels" chart-series="series" chart-options="options" chart-colors="colours"></canvas>
+                        
+                        <div class="row wrapper below-chart">
+                            <div class="pull-left">
+                                <a href="#" class="btn btn-primary btn-outline startTour"><i class="fa fa-play"></i> Start Tutorial</a>
+                            </div>
+                            <div class="pull-right">
+                                <a href="#" id="btnPrint" class="btn btn-success btn-outline">Print Report</a>
+                                <a href="#" ng-click="doTheBack()" class="btn btn-danger btn-outline">Exit Application</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="step6" class="col-md-3">
+                        <h2>
+                            Compare Results
+                        </h2>
+                        <div class="statistic-box">
+
+                            <ul class="stat-list">
+                                <li>
+                                    <h2 class="no-margins animate">${{totalBenefit | number:2}} /hr</h2>
+                                    <small>Your total hourly benefit</small>
+                                </li>
+                                <li class="text-navy">
+                                    <h2 class="no-margins">${{cityData.hourly_wage}} /hr</h2>
+                                    <small>Saskatoon Living Wage</small>
+                                </li>
+                                <li class="{{(livingwage < cityData.hourly_wage) ? 'text-danger' : 'text-navy'}}">
+                                    <h2 class="no-margins animate {{(livingwage < cityData.hourly_wage) ? 'text-danger' : 'text-navy'}}">${{livingwage | number:2}} /hr</h2>
+                                    <small>Your hourly rate + benefits</small>
+                                    <div class="stat-percent">{{percentChange | number:1}}% <i class="fa fa-bolt"></i></div>
+                                    <div class="progress progress-mini">
+                                        <div style="width: {{percentChange}}%;" class="progress-bar {{(livingwage < cityData.hourly_wage) ? 'progress-bar-danger' : 'progress-bar-default'}}"></div>
+                                    </div>
+                                    <small ng-if="livingwage < cityData.hourly_wage">{{percentChange | number:1}}% Lower than {{cityData.name}} wage</small>
+                                    <small ng-if="livingwage == cityData.hourly_wage">Same as {{cityData.name}} wage</small>           
+                                    <small ng-if="livingwage > cityData.hourly_wage">{{percentChange | number:1}}% Higher than {{cityData.name}} wage</small>
+                                </li>
+                            </ul>
+
+                        </div>
+                    </div>
+
+        </div>
+            <div id="bottom-content" class="row">
+                <div class="col-lg-12">
+                    <div class="wrapper wrapper-content">
+                        <div class="row">
+                            <div id="step2" class="col-lg-8">
+                                    <div class="ibox">
+                                        <div class="ibox-title">
+                                            <h5>Enter the monthly benefit provided by your organization</h5>
+                                            <div class="ibox-tools">
+                                                <span class="badge badge-warning"> ${{totalBenefit | number:2}} in total benefit per hour</span>
+                                            </div>
+                                        </div>
+                                        <div id="user-content" class="ibox-content wage">
+
+                                            <div class="project-list wage">
+
+                                                <table class="table table-hover">
+                                                    <tbody>
+                                                    <tr ng-repeat="item in cityData.items" ng-click="getTooltip($index)">
+                                                        <td class="project-status">
+                                                            <span class="label label-primary">{{$index + 1}}</span>
+                                                        </td>
+                                                        <td class="project-title">
+                                                            {{item.title}}
+                                                        </td>
+                                                        <td class="project-completion">
+                                                                <h2 class="wage-dollar">$</h2>
+                                                                <input type="number" maxlength="6" placeholder="0" class="form-control wage-input" ng-model="itemValue[item.id]" ng-keyup="calcHourRate(item.id, itemValue[item.id])" >
+                                                        </td>
+                                                        <td class="project-actions">
+                                                            ${{hourRate[item.id] | number:2}} /hr
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                            <div id="side-stuff" class="col-lg-4">
+                                
+                                    <div id="step3" class="ibox">
+                                        <div id="tooltip" class="ibox-content bg-primary">
+                                                <h3 class="animateTooltip">{{tooltipTitle}}</h3>
+
+                                            <p class="small animateTooltip" ng-bind-html="tooltipContent">
+                                            </p>
+
+                                        </div>
+                                    </div>
+                                    <div id="step4" class="ibox {{(finalWage > 0) ? '' : 'wage-final'}}">
+                                        <div class="ibox-content">
+                                            <h3>Your lowest hourly wage</h3>
+                                                <h2 class="wage-dollar">$</h2>
+                                                <input type="number" maxlength="6" placeholder="Enter your hourly wage" class="form-control wage-input" ng-model="finalWage" ng-keyup="calcWage()">
+                                            <div class="m-t-sm small">You need to include this to calculate your final living wage</div>
+                                        </div>
+                                    </div>
+                                    <div id="step5" class="widget no-padding">
+                                        <div class="p-w-m">
+                                            <h1 class="m-xs animate">${{livingwage | number:2}}</h1>
+                                            <h2 class="pull-right {{(livingwage < cityData.hourly_wage) ? 'text-danger' : 'text-navy'}}">
+                                                <i class="fa fa-play {{(livingwage < cityData.hourly_wage) ? 'fa-rotate-90' : 'fa-rotate-270'}}"></i> {{(livingwage < cityData.hourly_wage) ? 'Low' : 'High'}}
+                                            </h2>
+                                            <h3 class="font-bold no-margins">
+                                                Your hourly rate + benefits
+                                            </h3>
+                                            <small ng-if="livingwage < cityData.hourly_wage">Lower than the recommended value in  {{cityData.name}}</small>
+                                            <small ng-if="livingwage == cityData.hourly_wage">Same as the recommended value in {{cityData.name}}</small>           
+                                            <small ng-if="livingwage > cityData.hourly_wage">Higher than the recommended value in {{cityData.name}}</small>
+
+                                        </div>
+                                    </div>
+                               
+                            </div>
+
+                        </div>
+                        </div>
+                        <!--PRINT-->
+                        <div id="printdiv" class="row">
+                            <div class="col-xs-8">
+                            <h2>{{cityData.name}} Living Wage Calculator</h2><br>
+                                <div  class="table">
+                                    <table class="table table-bordered" >
+                                        <thead>
+                                        <tr>
+                                            <th style="width:40%"><small>Items</small></th>
+                                            <th style="width:20%"><small>{{cityData.name}} Budget</small></th>
+                                            <th style="width:20%"><small>Your Monthly Budget</small></th>
+                                            <th style="width:20%"><small>Your Budget per Hour</small></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr ng-repeat="item in cityData.items">
+                                            <td>{{item.title}}</td>
+                                            <td>${{item.monthly_budget | number:2}}</td>
+                                            <td>${{itemValue[item.id] | number:2}}</td>
+                                            <td class="center">${{hourRate[item.id] | number:2}} /hr</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                            </div>
+                            <div class="col-xs-4">
+                                <div class="statistic-box"><br/><br>
+
+                                <h3>
+                                    Compare Results
+                                </h3><br>
+                                    <ul class="stat-list">
+                                        <li>
+                                            <h2 class="no-margins">${{totalBenefit | number:2}} /hr</h2>
+                                            <small>Your total hourly benefit</small>
+                                        </li>
+                                        <li class="text-navy">
+                                            <h2 class="no-margins">${{cityData.hourly_wage}} /hr</h2>
+                                            <small>Saskatoon Living Wage</small>
+                                        </li>
+                                        <li class="text-navy">
+                                            <h2 class="no-margins">${{(finalWage | number:2) || 0}} /hr</h2>
+                                            <small>Your lowest hourly wage</small>
+                                        </li>
+                                        <li class="{{(livingwage < cityData.hourly_wage) ? 'text-danger' : 'text-navy'}}">
+                                            <h2 class="no-margins {{(livingwage < cityData.hourly_wage) ? 'text-danger' : 'text-navy'}}"><b>${{livingwage | number:2}} /hr</b></h2>
+                                            <small>Your hourly rate + benefits</small><br>
+                                            <b><small ng-if="livingwage < cityData.hourly_wage">{{percentChange | number:1}}% Lower than {{cityData.name}} wage</small>
+                                            <small ng-if="livingwage == cityData.hourly_wage">Same as {{cityData.name}} wage</small>           
+                                            <small ng-if="livingwage > cityData.hourly_wage">{{percentChange | number:1}}% Higher than {{cityData.name}} wage</small></b>
+                                        </li>
+                                    </ul>
+
+                                </div>
+                        </div>
+                        <div class="col-xs-12"><small>The living wage reflects how much a worker needs to earn in order to remain healthy, productive, and support themselves and their families with confidence.</small></div>
+                    </div>
+                    <!--END PRINT-->
+                    
+                    <div id="footer" class="footer">
+                        <div>
+                            <strong>Thanks</strong> - <a href="https://github.com/tbenjis/wageapp">Source on Github</a> | Data last updated in January 2018
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+    </div>
+
+
+
+
+    <!-- Mainly scripts -->
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/app/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.js"></script>
+    <script src="js/app/angular-chart.min.js"></script> 
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- APPS -->
+    <script src="js/app/app.js"></script> 
+
+    <!-- Custom and plugin javascript -->
+    <script src="js/inspinia.js"></script>
+    <script src="js/plugins/pace/pace.min.js"></script>
+
+    <!-- Bootstrap Tour -->
+    <script src="js/plugins/bootstrapTour/bootstrap-tour.min.js"></script>
+    <script src="js/printThis.js"></script>
+
+    <!--tour and printing -->
+    <script src="js/app/app2.js"></script> 
+
+</body>
+</html>
